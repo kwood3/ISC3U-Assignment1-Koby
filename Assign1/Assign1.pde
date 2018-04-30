@@ -1,7 +1,7 @@
 /***************************************************************************
  Assignment 1 for ISC3U
  Written by Koby W.
- April 25, 2018
+ April 20 - 29, 2018
  
  What the program is: This program contains 2 modules; 
  1. Math game - User is given an addition question, if the user gets it correct +1 score, if not -1 score
@@ -20,23 +20,25 @@ Button maze_button;                    // menu screen button to switch to maze s
 Button increaseValue;                  // math screen button to increase value
 Button decreaseValue;                  // math screen button to decrease value
 Button checkAns;                       // Check answer button in math screen
-Button menuScreen;                     // Button to go back to menu screen
+Button menuScreen;                     // Button to go back to menu screen (for math screen)
+Button menuScreen2;                    // Menu screen button for maze (first menu button didnt work due to bug that could not be resolved, so I made a second for the maze)
 Button exitBtn;                        // Button @ menu screen to exit application
 player user;                           // Circle that user moves in maze
 wall[] walls;                          // Walls in maze
 
-int state = 0;                         // [state #0 = Intro][state #1 = Menu] [state #2 = math] [state #3 = maze] 
+int state = 0;                         // [state #0 = Intro] [state #1 = Menu] [state #2 = math] [state #3 = maze] [state #4 = User is correct screen (for math question)] [state #5 = User is wrong screen (for math question)] [state #6 = Maze winner]
 String menuText ="";                   // menu screen text
 int value = 0;                         // value of user input @ math screen
 int qValue1 = (int) random(10);        // Expression value #1
 int qValue2 = (int) random(10);        // Expression value #2
 int score = 0;                         // score for both Math screen and Maze screen
-int circle1x = 600;
-int circle2x = 0;
-int circleSize = 10;
+int circle1x = 600;                    // Intro animation circle1 x value
+int circle2x = 0;                      // Intro animation circle2 x value
+int circleSize = 10;                   // Intro animation's circle's size
+int timer1 = 0;                        // timer (alternative to delay() which just adds a delay to the entire code rather than adding a delay after the code)
 
 void setup() {
-  background(255);
+  background(200);
   //introCircles();
   size (600, 600);
   fill(0);
@@ -50,8 +52,20 @@ void setup() {
 
   increaseValue = new Button("+", 300, 500, 50, 50);
   decreaseValue = new Button("-", 400, 500, 50, 50);
-  checkAns      = new Button("Check Answer", 320, 430, 200, 50);
-  menuScreen    = new Button("Menu", 100, 500, 60, 60);
+  checkAns      = new Button("Check Answer", 0, 430, 200, 50);
+  menuScreen    = new Button("Menu", 0, 540, 60, 60);
+  menuScreen2   = new Button("Menu", 0, 540, 60, 60);
+
+  user     = new player(50, 300);       // user in maze
+  walls    = new wall[8];               // # of walls
+  walls[0] = new wall(250, 0, 50, 325);
+  walls[1] = new wall(0, 370, 300, 50);
+  walls[2] = new wall(350, 0, 70, 425);
+  walls[3] = new wall(0, 460, 700, 50);
+  walls[4] = new wall(465, 375, 250, 50);
+  walls[5] = new wall(405, 285, 150, 50);
+  walls[6] = new wall(455, 105, 155, 135);
+  walls[7] = new wall(405, 45, 160, 30);
 }
 
 void draw() {
@@ -65,7 +79,12 @@ void draw() {
     introCircles();
     fill(255);
     textSize(20);
-    text("Click Anywhere to continue!", 50, 550);
+    //text("Click Anywhere to continue!", 50, 550);
+    timer1++;
+    if (timer1 == 65) {
+      state = 1;
+      timer1 = 0;
+    }
   }
 
   /* 
@@ -91,7 +110,7 @@ void draw() {
       menuText = "Exit the application";
       //print("mouseisover = true for exitBtn");
     } else {
-      background(255); // hide text if mouse is not over button
+      background(200); // hide text if mouse is not over button
     }
     // Drawing buttons to screen
     math_button.Draw();
@@ -106,7 +125,7 @@ void draw() {
    
    */
   else if (state == 2) {
-    background(255);
+    background(200);
     text(value, 375, 520);
     text(qValue1, 200, 200);
     text("+", 230, 200);
@@ -124,12 +143,83 @@ void draw() {
    
    */
   else if (state == 3) {
-    background(255);
-    
-    user     = new player(50,300);
-    walls    = new wall[2];
-    walls[0] = new wall(250,0,50,300);
-    walls[1] = new wall(370,25,50,300);
+    background(200);
+    noStroke();
+    user.draw();
+    user.move(walls);
+    menuScreen2.Draw();
+
+    for (int i = 0; i < walls.length; i++) {
+      walls[i].draw();
+    }
+
+    fill(0);
+    text("Use WASD to move, Dont hit the walls!", 350, 580);
+
+    //winning obj
+    fill(0, 255, 20);
+    rect(420, 15, 15, 15);
+  }
+  /*
+  
+   
+   User is Correct Screen
+   
+   
+   */
+  else if (state == 4) {
+    background(200);
+    fill(0, 255, 0);
+    textSize(55);
+    text("Correct!", 300, 300);
+    timer1++;
+    println("timer: ", timer1);
+    if (timer1 == 50) {
+      state =2;
+      createQuestion();
+      timer1 = 0;
+    }
+  }
+  /*
+  
+   
+   User is Wrong Screen
+   
+   
+   */
+  else if (state == 5) {
+    background(200);
+    fill(255, 0, 0);
+    textSize(55);
+    text("Wrong!", 300, 300);
+    timer1++;
+    println("timer: ", timer1);
+    if (timer1 == 50) {
+      state =2;
+      createQuestion();
+      timer1 = 0;
+    }
+  }
+  /*
+  
+   
+   Maze complete screen
+   
+   
+   */
+  else if (state == 6) {
+    background(200);
+    fill(0, 255, 50);
+    textSize(55);
+    stroke(10);
+    text("Nice!", 300, 300);
+
+    timer1++;
+    println("timer: ", timer1);
+    if (timer1 == 65) {
+      state =1;
+      timer1 = 0;
+    }
   }
 }
 /* 
@@ -139,21 +229,22 @@ void draw() {
  */
 void mousePressed() {
 
-  if (state == 0) {
-    state = 1;
-  }
+  /*if (state == 0) {
+   state = 1;
+   }*/
+
   //math button @ menu screen
   if (math_button.MouseIsOver() && state == 1) {
-    background(255);
-    print("Clicked: Math Problem @ Menu, ");
-    print("Launching Math problem screen");
+    background(200);
+    println("Clicked: Math Problem @ Menu, ");
+    println("Launching Math problem screen");
     createQuestion();
     state = 2;
   }
   //maze button @ menu screen
   if (maze_button.MouseIsOver() && state == 1) {
-    print("Clicked: Maze @ Menu");
-    print("Launching Maze screen");
+    println("Clicked: Maze @ Menu");
+    println("Launching Maze screen");
     state = 3;
   }
 
@@ -171,29 +262,26 @@ void mousePressed() {
 
   //check answer button @ math screen
   if (checkAns.MouseIsOver() && state == 2) {
-    print(" User Clicked checkAns ");
-    print("Answer is ", qValue1 + qValue2);
-    if (value == qValue1 + qValue2) {
-      print(" Correct ");
-      score++;
-      fill(10, 200, 10);
-      //text("Correct!", 300, 300);
-      createQuestion();
-    } else if (value != qValue1 + qValue2) { // checks if user input does not equal to qValue1 + qValue2
-      score--;
-      fill(10, 10, 200);
-      //text("Wrong!", 300, 300);
+    if (isCorrect()) {
+      state = 4;
+    } else {
+      state = 5;
     }
   }
 
   if (menuScreen.MouseIsOver() && state == 2) {
     state = 1;
-    print(" Going back to menu ");
+    println(" Going back to menu ");
+  }
+
+  if (menuScreen2.MouseIsOver() && state == 3) {
+    state = 1;
+    println(" Going back to menu ");
   }
 
   if (exitBtn.MouseIsOver() && state == 1) {
     exit();
-    print(" User clicked exit ");
+    println(" User clicked exit ");
   }
 }
 
@@ -220,17 +308,24 @@ void introCircles() {
     //print("Commencing intro animation");
   } else {
     noLoop();
-    print("State is = 0 but not running animation");
+    println("State is = 0 but not running animation");
   }
 }
 
-//function that creates question
+//function that creates question in math screen
 void createQuestion() {
-  background(255);
+  background(200);
   int qValue1 = (int) random(10);    //Expression value #1
   int qValue2 = (int) random(10);    //Expression value #2
-  print(" qValue1: ", qValue1);
-  print(" qValue2: ", qValue2);
+  println(" qValue1: ", qValue1);
+  println(" qValue2: ", qValue2);
+}
+
+boolean isCorrect() { //boolean to check if user is correct
+  if (qValue1 + qValue2 == value) {
+    return true;
+  } 
+  return false;
 }
 
 //player class for maze
@@ -244,27 +339,33 @@ class player {
     y = _y;
   }
 
-  void Draw() {
+  void draw() {
     fill(0);
     ellipse(x, y, 30, 30);
-  }
 
+    if (x > 418 && x < (418 + 15) && y > 10 && y < (10 + 15)) { //checks every frame to see if user is at the end of the maze
+      state = 6;
+      print("User completed maze, going back to menu");
+      x = 50;
+      y = 300;
+    }
+  }
   //function to move player
   void move(wall[] walls) {
     float playerX = x;
     float playerY = y;
 
     if (keyPressed==true) {
-      print(key);
+      //print(key);
 
-      if (key==LEFT) {
-        playerX -= 5;
-      } else if (key==UP) {
-        playerY += 5;
-      } else if (key==DOWN) {
-        playerY -= 5;
-      } else if (key==RIGHT) {
-        playerX += 5;
+      if (key=='a') {
+        playerX -= 2;
+      } else if (key=='w') {
+        playerY -= 2;
+      } else if (key=='s') {
+        playerY += 2;
+      } else if (key=='d') {
+        playerX += 2;
       }
     }
     //boolean to check if player collides with wall
@@ -272,6 +373,9 @@ class player {
     for (int i = 0; i < walls.length; i++) {
       if (playerX > walls[i].x && playerX < (walls[i].x + walls[i].w) && playerY > walls[i].y && playerY < walls[i].y + walls[i].h) {
         didCollide = true;
+        x = 50;
+        y = 300;
+        //print("******COLLISION*******");
       }
     }
 
@@ -280,7 +384,7 @@ class player {
       y = playerY;
     }
   }
-}  
+}
 
 //wall class for maze
 class wall {
@@ -298,7 +402,8 @@ class wall {
     h = _h;
   }
 
-  void Draw() {
+  void draw() {
+    noStroke();
     fill(100);
     rect(x, y, w, h);
   }
