@@ -4,12 +4,17 @@
  April 20 - 29, 2018
  
  What the program is: This program contains 2 modules; 
- 1. Math game - User is given an addition question, if the user gets it correct +1 score, if not -1 score
+ 1. Math game - User is given an addition question, if the user gets it correct +1 score, if not -1 score.
  2. Maze game - user must use arrow keys to move the circle to the end of the maze.
  
  Functions:
+ * IntroCircles()   : This function is used when the program is launched.
+ * CreateQuestion() : This function creates a addition question for the math screen.
  
  Classes:
+ * Button : This class holds the constructer and MouseIsOver() boolean for buttons, the functions for buttons are defined in mousePressed.
+ * Wall   : This holds the constructor and draw function for walls.
+ * Player : This holds all the functions for the player (movement, draw, collisions).
  
  ****************************************************************************/
 
@@ -57,7 +62,7 @@ void setup() {
   menuScreen2   = new Button("Menu", 0, 540, 60, 60);
 
   user     = new player(50, 300);       // user in maze
-  walls    = new wall[8];               // # of walls
+  walls    = new wall[9];               // # of walls (Using Arrays)
   walls[0] = new wall(250, 0, 50, 325);
   walls[1] = new wall(0, 370, 300, 50);
   walls[2] = new wall(350, 0, 70, 425);
@@ -66,6 +71,7 @@ void setup() {
   walls[5] = new wall(405, 285, 150, 50);
   walls[6] = new wall(455, 105, 155, 135);
   walls[7] = new wall(405, 45, 160, 30);
+  walls[8] = new wall(0, 45, 200, 30);
 }
 
 void draw() {
@@ -149,7 +155,7 @@ void draw() {
     user.move(walls);
     menuScreen2.Draw();
 
-    for (int i = 0; i < walls.length; i++) {
+    for (int i = 0; i < walls.length; i++) { //draws all the walls at once, instead of adding a walls[#].draw(); for each wall.
       walls[i].draw();
     }
 
@@ -172,6 +178,7 @@ void draw() {
     fill(0, 255, 0);
     textSize(55);
     text("Correct!", 300, 300);
+    
     timer1++;
     println("timer: ", timer1);
     if (timer1 == 50) {
