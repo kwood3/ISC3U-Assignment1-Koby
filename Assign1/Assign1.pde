@@ -4,8 +4,8 @@
  April 20 - 29, 2018
  
  What the program is: This program contains 2 modules; 
- 1. Math game - User is given an addition question, if the user gets it correct +1 score, if not -1 score.
- 2. Maze game - user must use arrow keys to move the circle to the end of the maze.
+ 1. Math game - User is given an addition question
+ 2. Maze game - user must use WASD to move the circle to the end of the maze.
  
  Functions:
  * IntroCircles()   : This function is used when the program is launched.
